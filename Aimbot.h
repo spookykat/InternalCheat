@@ -1,5 +1,6 @@
 #pragma once
 #include "LocalPlayer.h"
+#include "EntityList.h"
 class Aimbot
 {
 public:
@@ -7,9 +8,11 @@ public:
 	void AimAt(Entity& Target);
 	void Toggle() { enabled = !enabled; }
 	bool IsToggled() { return enabled; }
+	void Run(EntityList &entityList);
 private:
 	LocalPlayer localPlayer;
 	DWORD* pClientState;
 	bool enabled = false;
+	Entity GetBestTarget(EntityList entityList);
 };
 

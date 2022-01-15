@@ -145,12 +145,14 @@
   <ItemGroup>
     <ClInclude Include="Aimbot.h" />
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="EntityList.h" />
     <ClInclude Include="LocalPlayer.h" />
     <ClInclude Include="Vector3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Aimbot.cpp" />
     <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="EntityList.cpp" />
     <ClCompile Include="LocalPlayer.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Vector3.cpp" />

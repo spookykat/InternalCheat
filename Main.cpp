@@ -2,6 +2,7 @@
 #include "Windows.h"
 #include "LocalPlayer.h"
 #include "Aimbot.h"
+#include "EntityList.h"
 FILE* pFile = nullptr;
 
 void mainHack() {
@@ -13,24 +14,15 @@ void mainHack() {
 
 	LocalPlayer localPlayer = LocalPlayer(ClientBaseAddr);
 	Aimbot aimbot(localPlayer, EngineBaseAddr);
-	Entity entity1(ClientBaseAddr, 1);
-	bool latest_state = false;
+	
 	while (true)
 	{
-		bool buttonState = GetAsyncKeyState(VK_INSERT) & 0x01;
-		if (buttonState != latest_state)
+		EntityList entitylist(ClientBaseAddr);
+		if (entitylist.Entities.size() - 1 != 0)
 		{
-
-			aimbot.Toggle();
-			std::cout << "pressed" << std::endl;
-
-		}
-		if (aimbot.IsToggled())
-		{
-			aimbot.AimAt(entity1);
+			aimbot.Run(entitylist);
 		}
 	}
-	
 }
 
 BOOL WINAPI DllMain(HMODULE hmodule, DWORD dwReason, LPVOID lpReserved) {
