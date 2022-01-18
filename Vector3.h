@@ -7,4 +7,5 @@ struct Vector3
 };
 
 Vector3 Vector3Subtract(Vector3 x, Vector3 y);
+Vector3 Vector3Add(Vector3 x, Vector3 y);
 #endif

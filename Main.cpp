@@ -17,11 +17,14 @@ void mainHack() {
 	
 	while (true)
 	{
-		EntityList entitylist(ClientBaseAddr);
-		if (entitylist.Entities.size() - 1 != 0)
-		{
-			aimbot.Run(entitylist);
+		if (GetAsyncKeyState(VK_INSERT)) {
+			EntityList entitylist(ClientBaseAddr);
+			if (entitylist.Entities.size() - 1 != 0)
+			{
+				aimbot.Run(entitylist);
+			}
 		}
+		
 	}
 }
 

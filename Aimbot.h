@@ -1,6 +1,7 @@
 #pragma once
 #include "LocalPlayer.h"
 #include "EntityList.h"
+#include "Offsets.h"
 class Aimbot
 {
 public:

@@ -146,6 +146,7 @@
     <ClInclude Include="Aimbot.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityList.h" />
+    <ClInclude Include="Offsets.h" />
     <ClInclude Include="LocalPlayer.h" />
     <ClInclude Include="Vector3.h" />
   </ItemGroup>

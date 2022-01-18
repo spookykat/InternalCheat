@@ -30,6 +30,9 @@
     <ClInclude Include="EntityList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Offsets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LocalPlayer.cpp">
