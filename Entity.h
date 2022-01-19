@@ -16,6 +16,8 @@ public:
 	bool isDormant();
 	int getTeamNum();
 	Vector3 getBonePos(int boneID);
+	DWORD getGlowIndex();
+	int SpottedByMask();
 private:
 	int* pHealth;
 	Vector3* pVecOrigin;

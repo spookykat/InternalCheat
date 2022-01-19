@@ -37,3 +37,9 @@ Vector3 Entity::getBonePos(int boneID) {
 	bonePos.z = *(float*)(boneMatrix + 0x30 * boneID + 0x2C);
 	return bonePos;
 }
+DWORD Entity::getGlowIndex() {
+	return *(DWORD*)(*pEntityAddr + offsets::GlowIndex);
+}
+int Entity::SpottedByMask() {
+	return *(int*)(*pEntityAddr + offsets::SpottedByMask);
+}

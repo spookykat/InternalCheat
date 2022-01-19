@@ -146,6 +146,8 @@
     <ClInclude Include="Aimbot.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityList.h" />
+    <ClInclude Include="GlowHack.h" />
+    <ClInclude Include="GlowObject.h" />
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="LocalPlayer.h" />
     <ClInclude Include="Vector3.h" />
@@ -154,6 +156,7 @@
     <ClCompile Include="Aimbot.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityList.cpp" />
+    <ClCompile Include="GlowHack.cpp" />
     <ClCompile Include="LocalPlayer.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Vector3.cpp" />

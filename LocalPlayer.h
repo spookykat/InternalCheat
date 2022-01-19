@@ -9,8 +9,10 @@ class LocalPlayer : public Entity
 {
 public:
 	LocalPlayer();
-	LocalPlayer(DWORD &ClientBaseAddr);
+	LocalPlayer(DWORD &ClientBaseAddr, DWORD &EngineBaseAddr);
 	Vector3 GetCameraOffset();
+	int getPlayerID();
 private:
+	DWORD clientState;
 };
 

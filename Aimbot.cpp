@@ -43,7 +43,7 @@ Entity Aimbot::GetBestTarget(EntityList entityList) {
 	int LocalPlayerTeam = localPlayer.getTeamNum();
 	for (int i = 0; i < entityList.Entities.size() - 1; i++) //  -1 because last one is just null?? 
 	{
-		if (!entityList.Entities[i].isDormant() && LocalPlayerTeam != entityList.Entities[i].getTeamNum() && entityList.Entities[i].getHealth() > 0)
+		if (!entityList.Entities[i].isDormant() && LocalPlayerTeam != entityList.Entities[i].getTeamNum() && entityList.Entities[i].getHealth() > 0 && entityList.Entities[i].SpottedByMask() & (1 << localPlayer.getPlayerID()))
 		{
 			Vector3 EntityPos = entityList.Entities[i].getVecOrigin();
 			Vector3 Delta = Vector3Subtract(EntityPos, LocalPlayerView);
