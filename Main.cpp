@@ -4,14 +4,71 @@
 #include "Aimbot.h"
 #include "EntityList.h"
 #include "GlowHack.h"
+#include "tlhelp32.h"
+
 FILE* pFile = nullptr;
+
+
+
+DWORD GetModuleBase(const wchar_t* ModuleName, DWORD ProcessId) {
+	MODULEENTRY32 ModuleEntry = { 0 };
+	HANDLE SnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, ProcessId);
+
+
+	if (!SnapShot)
+		return NULL;
+
+
+	ModuleEntry.dwSize = sizeof(ModuleEntry);
+
+
+	if (!Module32First(SnapShot, &ModuleEntry))
+		return NULL;
+
+
+	do {
+		if (!wcscmp(ModuleEntry.szModule, ModuleName)) {
+			CloseHandle(SnapShot);
+			return (DWORD)ModuleEntry.modBaseAddr;
+		}
+	} while (Module32Next(SnapShot, &ModuleEntry));
+
+
+	CloseHandle(SnapShot);
+	return NULL;
+}
+DWORD GetProcId(const wchar_t* procName) {
+	DWORD procId = 0;
+	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (hSnap != INVALID_HANDLE_VALUE)
+	{
+		PROCESSENTRY32 procEntry;
+		procEntry.dwSize = sizeof(procEntry);
+
+		if (Process32First(hSnap, &procEntry))
+		{
+			do {
+				if (!_wcsicmp(procEntry.szExeFile, procName))
+				{
+					procId = procEntry.th32ProcessID;
+					break;
+				}
+			} while (Process32Next(hSnap, &procEntry));
+		}
+	}
+	CloseHandle(hSnap);
+	return procId;
+}
 
 void mainHack() {
 	AllocConsole();						//attaches console	
 	freopen_s(&pFile, "CONOUT$", "w", stdout);
 	std::cout << "We Can Use Console For Debugging!\n";
-	DWORD ClientBaseAddr = (DWORD)GetModuleHandle(L"client.dll");
-	DWORD EngineBaseAddr = (DWORD)GetModuleHandle(L"engine.dll");
+
+	DWORD ProcId = GetProcId(L"csgo");
+	DWORD ClientBaseAddr = GetModuleBase(L"client.dll", ProcId);
+	DWORD EngineBaseAddr = GetModuleBase(L"engine.dll", ProcId);
+
 
 	LocalPlayer localPlayer = LocalPlayer(ClientBaseAddr, EngineBaseAddr);
 	Aimbot aimbot(localPlayer, EngineBaseAddr);
@@ -26,7 +83,7 @@ void mainHack() {
 			}
 		}
 		EntityList entitylist(ClientBaseAddr);
-		glowhack.Run(entitylist,localPlayer);
+		//glowhack.Run(entitylist, localPlayer);
 	}
 }
 
