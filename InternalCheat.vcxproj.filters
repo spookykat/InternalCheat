@@ -30,13 +30,13 @@
     <ClInclude Include="EntityList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Offsets.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GlowHack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GlowObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Offsets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

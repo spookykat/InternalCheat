@@ -3,12 +3,11 @@
 #include <corecrt_math_defines.h>
 
 
-Aimbot::Aimbot(LocalPlayer &localPlayer, DWORD &engineBaseAddr) {
-	this->localPlayer = localPlayer;
+Aimbot::Aimbot(DWORD &engineBaseAddr) {
 	this->pClientState = (DWORD*)(engineBaseAddr + offsets::ClientState);
 }
 
-void Aimbot::AimAt(Entity &Target) {
+void Aimbot::AimAt(LocalPlayer& localPlayer, Entity &Target) {
 	Vector3 LocalPlayerPos = localPlayer.getVecOrigin();
 	Vector3 LocalPlayerView = Vector3Add(LocalPlayerPos, localPlayer.GetCameraOffset());
 
@@ -26,15 +25,15 @@ void Aimbot::AimAt(Entity &Target) {
 	*pPitch = pitch;
 	*pYaw = yaw;
 }
-void Aimbot::Run(EntityList &entityList) {
-	Entity Target = GetBestTarget(entityList);
+void Aimbot::Run(LocalPlayer& localPlayer, EntityList &entityList) {
+	Entity Target = GetBestTarget(localPlayer, entityList);
 	if (!Target.isEmpty())
 	{
-		AimAt(Target);
+		AimAt(localPlayer, Target);
 	}
 	
 }
-Entity Aimbot::GetBestTarget(EntityList entityList) {
+Entity Aimbot::GetBestTarget(LocalPlayer& localPlayer, EntityList entityList) {
 	Entity bestTarget;
 	double shortestDistance = 9999999;
 	Vector3 LocalPlayerPos = localPlayer.getVecOrigin();

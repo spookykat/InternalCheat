@@ -69,21 +69,34 @@ void mainHack() {
 	DWORD ClientBaseAddr = GetModuleBase(L"client.dll", ProcId);
 	DWORD EngineBaseAddr = GetModuleBase(L"engine.dll", ProcId);
 
-
-	LocalPlayer localPlayer = LocalPlayer(ClientBaseAddr, EngineBaseAddr);
-	Aimbot aimbot(localPlayer, EngineBaseAddr);
-	Glowhack glowhack(ClientBaseAddr);
+	bool lastToggle = false;
+	bool currentToggle = false;
+	bool GlowEnable = false;
 	while (true)
 	{
+		lastToggle = currentToggle;
+		currentToggle = GetAsyncKeyState(VK_NUMPAD0) & 0x01;
+		
+		LocalPlayer localPlayer = LocalPlayer(ClientBaseAddr, EngineBaseAddr);
+		EntityList entitylist(ClientBaseAddr);
+		Aimbot aimbot(EngineBaseAddr);
+		Glowhack glowhack(ClientBaseAddr);
+		
 		if (GetAsyncKeyState(VK_XBUTTON2)) {
-			EntityList entitylist(ClientBaseAddr);
 			if (entitylist.Entities.size() - 1 != 0)
 			{
-				aimbot.Run(entitylist);
+				aimbot.Run(localPlayer, entitylist);
 			}
 		}
-		EntityList entitylist(ClientBaseAddr);
-		//glowhack.Run(entitylist, localPlayer);
+		if (currentToggle && lastToggle != currentToggle)
+		{
+			GlowEnable = !GlowEnable;
+		}
+		if (GlowEnable)
+		{
+			glowhack.Run(entitylist, localPlayer);
+		}
+		
 	}
 }
 

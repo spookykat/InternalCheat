@@ -9,4 +9,5 @@ public:
 	void Run(EntityList entityList, LocalPlayer localPlayer);
 private:
 	DWORD glowObjectManager;
+	DWORD ClientBaseAddr;
 };
