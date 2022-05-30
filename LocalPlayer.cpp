@@ -14,3 +14,9 @@ Vector3 LocalPlayer::GetCameraOffset() {
 int LocalPlayer::getPlayerID() {
 	return *(int*)(clientState + offsets::GetLocalPlayer);
 }
+BYTE LocalPlayer::getFlag() {
+	return *(BYTE*)(*pEntityAddr + offsets::Flag);
+}
+int LocalPlayer::getCrossID() {
+	return *(int*)(*pEntityAddr + offsets::CrosshairId);
+}

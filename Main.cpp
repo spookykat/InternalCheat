@@ -1,14 +1,32 @@
 #include <iostream>
-#include "Windows.h"
 #include "LocalPlayer.h"
 #include "Aimbot.h"
 #include "EntityList.h"
 #include "GlowHack.h"
 #include "tlhelp32.h"
+#include "Offsets.h"
+#include "kiero/kiero.h"
+#include "kiero/minhook/include/MinHook.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_win32.h"
+#include "imgui/imgui_impl_dx9.h"
+#include <d3d9.h>
+#include <d3dx9.h>
+#include "BunnyHop.h"
+#include "TriggerBot.h"
 
 FILE* pFile = nullptr;
+typedef long(__stdcall* EndScene)(LPDIRECT3DDEVICE9);
+typedef LRESULT(CALLBACK* WNDPROC)(HWND, UINT, WPARAM, LPARAM);
+static EndScene oEndScene;
+HWND window =NULL;
+WNDPROC oWndProc;
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-
+DWORD ProcId;
+DWORD ClientBaseAddr;
+DWORD EngineBaseAddr;
+HMODULE hModule;
 
 DWORD GetModuleBase(const wchar_t* ModuleName, DWORD ProcessId) {
 	MODULEENTRY32 ModuleEntry = { 0 };
@@ -60,48 +78,135 @@ DWORD GetProcId(const wchar_t* procName) {
 	return procId;
 }
 
-void mainHack() {
-	AllocConsole();						//attaches console	
-	freopen_s(&pFile, "CONOUT$", "w", stdout);
-	std::cout << "We Can Use Console For Debugging!\n";
+void InitImGui(LPDIRECT3DDEVICE9 pDevice) {
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
+	ImGui_ImplWin32_Init(window);
+	ImGui_ImplDX9_Init(pDevice);
+}
 
-	DWORD ProcId = GetProcId(L"csgo");
-	DWORD ClientBaseAddr = GetModuleBase(L"client.dll", ProcId);
-	DWORD EngineBaseAddr = GetModuleBase(L"engine.dll", ProcId);
+bool init = false;
+bool show = false;
+bool glowhacktoggle = false;
+bool bhoptoggle = false;
+bool triggerToggle = false;
 
-	bool lastToggle = false;
-	bool currentToggle = false;
-	bool GlowEnable = false;
-	while (true)
+long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
+	if (!init)
 	{
-		lastToggle = currentToggle;
-		currentToggle = GetAsyncKeyState(VK_NUMPAD0) & 0x01;
-		
-		LocalPlayer localPlayer = LocalPlayer(ClientBaseAddr, EngineBaseAddr);
-		EntityList entitylist(ClientBaseAddr);
-		Aimbot aimbot(EngineBaseAddr);
-		Glowhack glowhack(ClientBaseAddr);
-		
-		if (GetAsyncKeyState(VK_XBUTTON2)) {
-			if (entitylist.Entities.size() - 1 != 0)
-			{
-				aimbot.Run(localPlayer, entitylist);
-			}
-		}
-		if (currentToggle && lastToggle != currentToggle)
-		{
-			GlowEnable = !GlowEnable;
-		}
-		if (GlowEnable)
-		{
-			glowhack.Run(entitylist, localPlayer);
-		}
-		
+		InitImGui(pDevice);
+		init = true;
 	}
+
+	if (GetAsyncKeyState(VK_END)) {
+		kiero::shutdown();
+		return 0;
+	}
+
+	if (GetAsyncKeyState(VK_INSERT) & 1)
+	{
+		show = !show;
+	}
+
+	if (show) {
+		ImGui_ImplDX9_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::Begin("ImGui Window");
+		
+		ImGui::Checkbox("GlowHack", &glowhacktoggle);
+		ImGui::Checkbox("BunnyHop", &bhoptoggle);
+		ImGui::Checkbox("TriggerBot", &triggerToggle);
+
+		ImGui::End();
+
+		ImGui::EndFrame();
+		ImGui::Render();
+		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+	}
+	
+	LocalPlayer localPlayer = LocalPlayer(ClientBaseAddr, EngineBaseAddr);
+	EntityList entitylist(ClientBaseAddr);
+	Aimbot aimbot(EngineBaseAddr);
+	Glowhack glowhack(ClientBaseAddr);
+	BunnyHop bunnyhop(ClientBaseAddr);
+	TriggerBot triggerBot(ClientBaseAddr);
+
+	if (GetAsyncKeyState(VK_XBUTTON2)) {
+		if (entitylist.Entities.size() - 1 != 0)
+		{
+			aimbot.Run(localPlayer, entitylist);
+		}
+	}
+	if (glowhacktoggle)
+	{
+		glowhack.Run(entitylist, localPlayer);
+	}
+	if (GetAsyncKeyState(VK_SPACE) && bhoptoggle)
+	{
+		bunnyhop.Run(localPlayer);
+	}
+	if (triggerToggle) {
+		triggerBot.Run(localPlayer, entitylist);
+	}
+	return oEndScene(pDevice);
+}
+
+LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+	if (true && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+		return true;
+
+	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
+}
+
+BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam)
+{
+	DWORD wndProcId;
+	GetWindowThreadProcessId(hwnd, &wndProcId);
+
+	if (GetCurrentProcessId() != wndProcId)
+		return TRUE; // skip to next window
+
+	window = hwnd;
+	return FALSE; // window found abort search
+}
+
+HWND GetProcessWindow()
+{
+	window = NULL;
+	EnumWindows(EnumWindowsCallback, NULL);
+	return window;
+}
+void mainHack() {
+	/*AllocConsole();						//attaches console	
+	freopen_s(&pFile, "CONOUT$", "w", stdout);*/
+	//std::cout << "We Can Use Console For Debugging!\n";
+
+	ProcId = GetProcId(L"csgo.exe");
+	ClientBaseAddr = GetModuleBase(L"client.dll", ProcId);
+	EngineBaseAddr = GetModuleBase(L"engine.dll", ProcId);
+
+	bool attached = false;
+	do
+	{
+		if (kiero::init(kiero::RenderType::D3D9) == kiero::Status::Success)
+		{
+			kiero::bind(42, (void**)&oEndScene, hkEndScene);
+			do
+				window = GetProcessWindow();
+			while (window == NULL);
+			oWndProc = (WNDPROC)SetWindowLongPtr(window, GWL_WNDPROC, (LONG_PTR)WndProc);
+			attached = true;
+		}
+	} while (!attached);
 }
 
 BOOL WINAPI DllMain(HMODULE hmodule, DWORD dwReason, LPVOID lpReserved) {
 	if (dwReason == DLL_PROCESS_ATTACH) {
+		hModule = hmodule;
 		DisableThreadLibraryCalls(hmodule);		
 		CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)mainHack, NULL, NULL, NULL);
 	}
