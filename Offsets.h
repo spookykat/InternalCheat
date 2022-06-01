@@ -23,6 +23,7 @@ namespace offsets {
 	constexpr int ForceJump = 0x5280924;
 	constexpr int ForceAttack = 0x3206E9C;
 	constexpr int CrosshairId = 0x11838;
+	constexpr int ViewMatrix = 0x4DC82F4;
 }
 	
 

@@ -14,6 +14,8 @@
 #include <d3dx9.h>
 #include "BunnyHop.h"
 #include "TriggerBot.h"
+#include "Drawing.h"
+#include "ESP.h"
 
 FILE* pFile = nullptr;
 typedef long(__stdcall* EndScene)(LPDIRECT3DDEVICE9);
@@ -22,6 +24,8 @@ static EndScene oEndScene;
 HWND window =NULL;
 WNDPROC oWndProc;
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+int windowHeight, windowWidth;
 
 DWORD ProcId;
 DWORD ClientBaseAddr;
@@ -91,11 +95,17 @@ bool show = false;
 bool glowhacktoggle = false;
 bool bhoptoggle = false;
 bool triggerToggle = false;
+bool espTracers = false;
+bool aimThroughWall = false;
 
 long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 	if (!init)
 	{
 		InitImGui(pDevice);
+		D3DVIEWPORT9 viewPort;
+		pDevice->GetViewport(&viewPort);
+		windowHeight = viewPort.Height;
+		windowWidth = viewPort.Width;
 		init = true;
 	}
 
@@ -119,20 +129,24 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 		ImGui::Checkbox("GlowHack", &glowhacktoggle);
 		ImGui::Checkbox("BunnyHop", &bhoptoggle);
 		ImGui::Checkbox("TriggerBot", &triggerToggle);
-
+		ImGui::Checkbox("Tracers", &espTracers);
+		ImGui::Checkbox("Aim through walls", &aimThroughWall);
 		ImGui::End();
-
+		
 		ImGui::EndFrame();
 		ImGui::Render();
 		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 	}
-	
+
+	DrawFilledRect(windowWidth / 2 - 2, windowHeight / 2 - 2, 4, 4, D3DCOLOR_ARGB(255, 255, 255, 255), pDevice);
+
 	LocalPlayer localPlayer = LocalPlayer(ClientBaseAddr, EngineBaseAddr);
 	EntityList entitylist(ClientBaseAddr);
-	Aimbot aimbot(EngineBaseAddr);
+	Aimbot aimbot(EngineBaseAddr, aimThroughWall);
 	Glowhack glowhack(ClientBaseAddr);
 	BunnyHop bunnyhop(ClientBaseAddr);
 	TriggerBot triggerBot(ClientBaseAddr);
+	ESP Esp(ClientBaseAddr, pDevice);
 
 	if (GetAsyncKeyState(VK_XBUTTON2)) {
 		if (entitylist.Entities.size() - 1 != 0)
@@ -150,6 +164,10 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 	}
 	if (triggerToggle) {
 		triggerBot.Run(localPlayer, entitylist);
+	}
+	if (espTracers)
+	{
+		Esp.DrawSnaplines(entitylist, localPlayer);
 	}
 	return oEndScene(pDevice);
 }
@@ -182,8 +200,8 @@ HWND GetProcessWindow()
 }
 void mainHack() {
 	/*AllocConsole();						//attaches console	
-	freopen_s(&pFile, "CONOUT$", "w", stdout);*/
-	//std::cout << "We Can Use Console For Debugging!\n";
+	freopen_s(&pFile, "CONOUT$", "w", stdout);
+	std::cout << "We Can Use Console For Debugging!\n";*/
 
 	ProcId = GetProcId(L"csgo.exe");
 	ClientBaseAddr = GetModuleBase(L"client.dll", ProcId);

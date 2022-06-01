@@ -5,14 +5,12 @@
 class Aimbot
 {
 public:
-	Aimbot(DWORD &engineBaseAddr);
+	Aimbot(DWORD &engineBaseAddr, bool throughWall);
 	void AimAt(LocalPlayer& localPlayer, Entity& Target);
-	void Toggle() { enabled = !enabled; }
-	bool IsToggled() { return enabled; }
 	void Run(LocalPlayer& localPlayer, EntityList &entityList);
 private:
 	DWORD* pClientState;
-	bool enabled = false;
+	bool throughWall;
 	Entity GetBestTarget(LocalPlayer& localPlayer, EntityList entityList);
 };
 

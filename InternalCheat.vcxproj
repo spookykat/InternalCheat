@@ -76,7 +76,9 @@
     <LibraryPath>D:\DirectX\Lib\x86;D:\DirectX\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\DirectX\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\DirectX\Lib\x86;D:\DirectX\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -95,6 +97,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -112,6 +115,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -147,8 +151,10 @@
   <ItemGroup>
     <ClInclude Include="Aimbot.h" />
     <ClInclude Include="BunnyHop.h" />
+    <ClInclude Include="Drawing.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityList.h" />
+    <ClInclude Include="ESP.h" />
     <ClInclude Include="GlowHack.h" />
     <ClInclude Include="GlowObject.h" />
     <ClInclude Include="imgui\imconfig.h" />
@@ -171,13 +177,15 @@
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="LocalPlayer.h" />
     <ClInclude Include="TriggerBot.h" />
-    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Vectors.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Aimbot.cpp" />
     <ClCompile Include="BunnyHop.cpp" />
+    <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityList.cpp" />
+    <ClCompile Include="ESP.cpp" />
     <ClCompile Include="GlowHack.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -194,7 +202,7 @@
     <ClCompile Include="LocalPlayer.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TriggerBot.cpp" />
-    <ClCompile Include="Vector3.cpp" />
+    <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="kiero\minhook\dll_resources\MinHook.def" />
