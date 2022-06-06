@@ -7,6 +7,7 @@ class TriggerBot {
 public:
 	TriggerBot(DWORD &ClientBaseAddr);
 	void Run(LocalPlayer &localPlayer,EntityList &entityList);
+	static bool enabled;
 private:
 	DWORD& ClientBaseAddr;
 };

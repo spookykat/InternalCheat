@@ -1,5 +1,6 @@
 #include "TriggerBot.h"
 
+bool TriggerBot::enabled = false;
 TriggerBot::TriggerBot(DWORD& ClientBaseAddr) : ClientBaseAddr(ClientBaseAddr) {
 }
 

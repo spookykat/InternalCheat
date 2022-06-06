@@ -5,8 +5,6 @@
 #include "GlowHack.h"
 #include "tlhelp32.h"
 #include "Offsets.h"
-#include "kiero/kiero.h"
-#include "kiero/minhook/include/MinHook.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx9.h"
@@ -16,9 +14,11 @@
 #include "TriggerBot.h"
 #include "Drawing.h"
 #include "ESP.h"
+#include "hook.h"
+#include "mem.h"
 
 FILE* pFile = nullptr;
-typedef long(__stdcall* EndScene)(LPDIRECT3DDEVICE9);
+typedef HRESULT(APIENTRY* EndScene)(LPDIRECT3DDEVICE9 pDevice);
 typedef LRESULT(CALLBACK* WNDPROC)(HWND, UINT, WPARAM, LPARAM);
 static EndScene oEndScene;
 HWND window =NULL;
@@ -28,9 +28,11 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam
 int windowHeight, windowWidth;
 
 DWORD ProcId;
+DWORD wndProcID;
 DWORD ClientBaseAddr;
 DWORD EngineBaseAddr;
 HMODULE hModule;
+void* d3d9Device[119];
 
 DWORD GetModuleBase(const wchar_t* ModuleName, DWORD ProcessId) {
 	MODULEENTRY32 ModuleEntry = { 0 };
@@ -81,24 +83,36 @@ DWORD GetProcId(const wchar_t* procName) {
 	CloseHandle(hSnap);
 	return procId;
 }
+LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+	if (true && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+		return true;
+
+	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
+}
 
 void InitImGui(LPDIRECT3DDEVICE9 pDevice) {
 	ImGui::CreateContext();
+	D3DDEVICE_CREATION_PARAMETERS CP;
+	pDevice->GetCreationParameters(&CP);
+	window = CP.hFocusWindow;
 	ImGuiIO& io = ImGui::GetIO();
+
+	oWndProc = (WNDPROC)SetWindowLongPtr(window, GWL_WNDPROC, (LONG_PTR)WndProc);
+
 	io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
+	io.Fonts->AddFontDefault();
+
 	ImGui_ImplWin32_Init(window);
 	ImGui_ImplDX9_Init(pDevice);
 }
 
 bool init = false;
 bool show = false;
-bool glowhacktoggle = false;
 bool bhoptoggle = false;
-bool triggerToggle = false;
-bool espTracers = false;
-bool aimThroughWall = false;
+int switchtab = 0;
 
-long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
+HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 	if (!init)
 	{
 		InitImGui(pDevice);
@@ -107,11 +121,6 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 		windowHeight = viewPort.Height;
 		windowWidth = viewPort.Width;
 		init = true;
-	}
-
-	if (GetAsyncKeyState(VK_END)) {
-		kiero::shutdown();
-		return 0;
 	}
 
 	if (GetAsyncKeyState(VK_INSERT) & 1)
@@ -125,24 +134,43 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 		ImGui::NewFrame();
 
 		ImGui::Begin("ImGui Window");
+		if (ImGui::Button("Aimbot", ImVec2(100.0f, 0.0f))) {
+			switchtab = 1;
+		}
+		ImGui::SameLine(0.0, 2.0f);
+		if (ImGui::Button("Visuals", ImVec2(100.0f, 0.0f))) {
+			switchtab = 2;
+		}
+		ImGui::SameLine(0.0, 2.0f);
+		if (ImGui::Button("Misc", ImVec2(100.0f, 0.0f))) {
+			switchtab = 3;
+		}
+		switch (switchtab)
+		{
+		case 1:
+			Aimbot::Draw();
+			break;
+		case 2:
+			Glowhack::Draw();
+			ESP::Draw();
+			break;
+		case 3:
+			ImGui::Checkbox("BunnyHop", &bhoptoggle);
+			break;
+		}
 		
-		ImGui::Checkbox("GlowHack", &glowhacktoggle);
-		ImGui::Checkbox("BunnyHop", &bhoptoggle);
-		ImGui::Checkbox("TriggerBot", &triggerToggle);
-		ImGui::Checkbox("Tracers", &espTracers);
-		ImGui::Checkbox("Aim through walls", &aimThroughWall);
+		
+		
 		ImGui::End();
-		
 		ImGui::EndFrame();
 		ImGui::Render();
 		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 	}
-
+	
 	DrawFilledRect(windowWidth / 2 - 2, windowHeight / 2 - 2, 4, 4, D3DCOLOR_ARGB(255, 255, 255, 255), pDevice);
-
 	LocalPlayer localPlayer = LocalPlayer(ClientBaseAddr, EngineBaseAddr);
 	EntityList entitylist(ClientBaseAddr);
-	Aimbot aimbot(EngineBaseAddr, aimThroughWall);
+	Aimbot aimbot(EngineBaseAddr);
 	Glowhack glowhack(ClientBaseAddr);
 	BunnyHop bunnyhop(ClientBaseAddr);
 	TriggerBot triggerBot(ClientBaseAddr);
@@ -154,7 +182,7 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 			aimbot.Run(localPlayer, entitylist);
 		}
 	}
-	if (glowhacktoggle)
+	if (Glowhack::enabled)
 	{
 		glowhack.Run(entitylist, localPlayer);
 	}
@@ -162,22 +190,14 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 	{
 		bunnyhop.Run(localPlayer);
 	}
-	if (triggerToggle) {
+	if (TriggerBot::enabled) {
 		triggerBot.Run(localPlayer, entitylist);
 	}
-	if (espTracers)
+	if (ESP::Enabled())
 	{
-		Esp.DrawSnaplines(entitylist, localPlayer);
+		Esp.Run(entitylist, localPlayer);
 	}
 	return oEndScene(pDevice);
-}
-
-LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-
-	if (true && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
-		return true;
-
-	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
 BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam)
@@ -185,7 +205,7 @@ BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam)
 	DWORD wndProcId;
 	GetWindowThreadProcessId(hwnd, &wndProcId);
 
-	if (GetCurrentProcessId() != wndProcId)
+	if (wndProcID != wndProcId)
 		return TRUE; // skip to next window
 
 	window = hwnd;
@@ -207,24 +227,15 @@ void mainHack() {
 	ClientBaseAddr = GetModuleBase(L"client.dll", ProcId);
 	EngineBaseAddr = GetModuleBase(L"engine.dll", ProcId);
 
-	bool attached = false;
-	do
-	{
-		if (kiero::init(kiero::RenderType::D3D9) == kiero::Status::Success)
-		{
-			kiero::bind(42, (void**)&oEndScene, hkEndScene);
-			do
-				window = GetProcessWindow();
-			while (window == NULL);
-			oWndProc = (WNDPROC)SetWindowLongPtr(window, GWL_WNDPROC, (LONG_PTR)WndProc);
-			attached = true;
-		}
-	} while (!attached);
+	if (GetD3D9Device(d3d9Device, sizeof(d3d9Device))) {
+		oEndScene = (EndScene)TrampHook((char*)d3d9Device[42], (char*)hkEndScene, 7);
+	}
 }
 
 BOOL WINAPI DllMain(HMODULE hmodule, DWORD dwReason, LPVOID lpReserved) {
 	if (dwReason == DLL_PROCESS_ATTACH) {
 		hModule = hmodule;
+		wndProcID = GetCurrentProcessId();
 		DisableThreadLibraryCalls(hmodule);		
 		CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)mainHack, NULL, NULL, NULL);
 	}

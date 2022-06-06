@@ -157,6 +157,7 @@
     <ClInclude Include="ESP.h" />
     <ClInclude Include="GlowHack.h" />
     <ClInclude Include="GlowObject.h" />
+    <ClInclude Include="hook.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx9.h" />
@@ -165,15 +166,7 @@
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
-    <ClInclude Include="kiero\kiero.h" />
-    <ClInclude Include="kiero\minhook\include\MinHook.h" />
-    <ClInclude Include="kiero\minhook\src\buffer.h" />
-    <ClInclude Include="kiero\minhook\src\hde\hde32.h" />
-    <ClInclude Include="kiero\minhook\src\hde\hde64.h" />
-    <ClInclude Include="kiero\minhook\src\hde\pstdint.h" />
-    <ClInclude Include="kiero\minhook\src\hde\table32.h" />
-    <ClInclude Include="kiero\minhook\src\hde\table64.h" />
-    <ClInclude Include="kiero\minhook\src\trampoline.h" />
+    <ClInclude Include="mem.h" />
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="LocalPlayer.h" />
     <ClInclude Include="TriggerBot.h" />
@@ -187,25 +180,19 @@
     <ClCompile Include="EntityList.cpp" />
     <ClCompile Include="ESP.cpp" />
     <ClCompile Include="GlowHack.cpp" />
+    <ClCompile Include="hook.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_dx9.cpp" />
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="kiero\kiero.cpp" />
-    <ClCompile Include="kiero\minhook\src\buffer.c" />
-    <ClCompile Include="kiero\minhook\src\hde\hde32.c" />
-    <ClCompile Include="kiero\minhook\src\hde\hde64.c" />
-    <ClCompile Include="kiero\minhook\src\hook.c" />
-    <ClCompile Include="kiero\minhook\src\trampoline.c" />
     <ClCompile Include="LocalPlayer.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="mem.cpp" />
     <ClCompile Include="TriggerBot.cpp" />
     <ClCompile Include="Vectors.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="kiero\minhook\dll_resources\MinHook.def" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="kiero\minhook\dll_resources\MinHook.rc" />

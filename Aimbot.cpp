@@ -2,10 +2,17 @@
 #include <iostream>
 #include <corecrt_math_defines.h>
 #include "Vectors.h"
+#include "imgui/imgui.h"
 
-Aimbot::Aimbot(DWORD &engineBaseAddr, bool throughWall) {
+bool Aimbot::throughWalls = false;
+
+void Aimbot::Draw() {
+	ImGui::Text("Aimbot");
+	ImGui::Checkbox("TriggerBot", &TriggerBot::enabled);
+	ImGui::Checkbox("Aim through walls", &Aimbot::throughWalls);
+}
+Aimbot::Aimbot(DWORD &engineBaseAddr) {
 	this->pClientState = (DWORD*)(engineBaseAddr + offsets::ClientState);
-	this->throughWall = throughWall;
 }
 
 void Aimbot::AimAt(LocalPlayer& localPlayer, Entity &Target) {
@@ -43,7 +50,7 @@ Entity Aimbot::GetBestTarget(LocalPlayer& localPlayer, EntityList entityList) {
 	int LocalPlayerTeam = localPlayer.getTeamNum();
 	for (int i = 0; i < entityList.Entities.size() - 1; i++) //  -1 because last one is just null?? 
 	{
-		if (!entityList.Entities[i].isDormant() &&  LocalPlayerTeam != entityList.Entities[i].getTeamNum() && entityList.Entities[i].getHealth() > 0 && (entityList.Entities[i].SpottedByMask() & (1 << localPlayer.getPlayerID()) || throughWall))
+		if (!entityList.Entities[i].isDormant() &&  LocalPlayerTeam != entityList.Entities[i].getTeamNum() && entityList.Entities[i].getHealth() > 0 && (entityList.Entities[i].SpottedByMask() & (1 << localPlayer.getPlayerID()) || throughWalls))
 		{
 			Vector3 EntityPos = entityList.Entities[i].getVecOrigin();
 			Vector3 Delta = Vector3Subtract(EntityPos, LocalPlayerView);
