@@ -194,9 +194,6 @@
     <ClCompile Include="TriggerBot.cpp" />
     <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="kiero\minhook\dll_resources\MinHook.rc" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

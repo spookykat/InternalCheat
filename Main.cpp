@@ -176,7 +176,7 @@ HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 	TriggerBot triggerBot(ClientBaseAddr);
 	ESP Esp(ClientBaseAddr, pDevice);
 
-	if (GetAsyncKeyState(VK_XBUTTON2)) {
+	if (GetAsyncKeyState(VK_MENU)) {
 		if (entitylist.Entities.size() - 1 != 0)
 		{
 			aimbot.Run(localPlayer, entitylist);
